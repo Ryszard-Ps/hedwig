@@ -9,6 +9,7 @@ services:
       - db
     ports:
       - "5000:5000"
+      - "5678:5678"
     environment:
       - PYTHONPATH=/usr/src/app/lib
       - HEDWIG_DIR=/usr/src/app
@@ -16,8 +17,6 @@ services:
     image: mariadb:10.1.16
     volumes_from:
       - data
-    ports:
-      - "3306:3306"
     depends_on:
       - data
     environment:
