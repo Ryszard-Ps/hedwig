@@ -1,7 +1,6 @@
 version: "2"
 services:
   hedwig:
-    image: python:2.7.12
     build:
       context: .
       dockerfile: ./Dockerfile
@@ -13,6 +12,9 @@ services:
     environment:
       - PYTHONPATH=/usr/src/app/lib
       - HEDWIG_DIR=/usr/src/app
+    volumes:
+      - .:/usr/src/app
+      - ./cron-task:/etc/cron.d
   db:
     image: mariadb:10.1.16
     volumes_from:
@@ -22,6 +24,8 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=rjbits
       - MYSQL_DATABASE=hedwig
+    ports:
+      - "3306:3306"
   data:
     image: busybox
     volumes:
