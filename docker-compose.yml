@@ -4,17 +4,17 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile
+    image: sezzh/hedwig
     depends_on:
       - db
     ports:
       - "5000:5000"
       - "5678:5678"
     environment:
-      - PYTHONPATH=/usr/src/app/lib
-      - HEDWIG_DIR=/usr/src/app
+      - PYTHONPATH=/home/app/hedwig/lib
+      - HEDWIG_DIR=/home/app/hedwig
     volumes:
-      - .:/usr/src/app
-      - ./cron-task:/etc/cron.d
+      - .:/home/app/hedwig
   db:
     image: mariadb:10.1.16
     volumes_from:

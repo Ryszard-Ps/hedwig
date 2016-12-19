@@ -11,3 +11,5 @@ PyPDF2
 python-magic
 requests
 SQLAlchemy
+
+egenix-mxodbc==3.3.5

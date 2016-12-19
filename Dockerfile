@@ -1,34 +1,63 @@
-FROM python:2.7.12
+# Use phusion/passenger-full as base image. To make your builds reproducible, make
+# sure you lock down to a specific version, not to `latest`!
+# See https://github.com/phusion/passenger-docker/blob/master/Changelog.md for
+# a list of version numbers.
+# FROM phusion/passenger-full:0.9.19
+# FROM phusion/baseimage:0.9.19
+# Or, instead of the 'full' variant, use one of these:
+FROM phusion/passenger-customizable:0.9.19
 MAINTAINER sezzhltd@gmail.com
+
+# Set correct environment variables.
+ENV HOME=/root
+
+# Use baseimage-docker's init process.
+CMD ["/sbin/my_init"]
+
+# If you're using the 'customizable' variant, you need to explicitly opt-in
+# for features. Uncomment the features you want:
+#
+#   Build system and git.
+RUN /pd_build/utilities.sh
+
+#   Python support.
+RUN /pd_build/python.sh
+
+# ...app build instructions...
 
 EXPOSE 5000
 EXPOSE 5678
-ENV PYTHONPATH=/usr/src/app/lib
-ENV HEDWIG_DIR=/usr/src/app
-RUN mkdir -p /usr/src/app
+ENV PYTHONPATH=/home/app/hedwig/lib
+ENV HEDWIG_DIR=/home/app/hedwig
 
-WORKDIR /usr/src/app
+RUN mkdir -p /home/app/hedwig
+WORKDIR /home/app/hedwig
 
-# ghostscript
+# necessary dependencies from apt-get
 RUN apt-get update && apt-get install -y \
-  apt-utils \
-  python-dev \
-  libmysqlclient-dev \
-  ghostscript \
-  graphviz \
-  cron
+apt-utils \
+python-dev \
+libmysqlclient-dev \
+ghostscript \
+graphviz \
+python-pip
 
-COPY ./requirements_server.txt /usr/src/app/requirements_server.txt
-# COPY ./cron-task/hedwig-cron /etc/cron.d/hedwig-cron
-# COPY ./cron-task/hello-cron /etc/cron.d/hello-cron
-COPY . /usr/src/app
+COPY . /home/app/hedwig
 
-RUN touch /var/log/cron.log
-# RUN chmod 0644 /etc/cron.d/hello-cron
-# RUN chmod 0644 /etc/cron.d/hedwig-cron
 RUN pip install --upgrade pip \
   && pip install http://cdn.mysql.com/Downloads/Connector-Python/mysql-connector-python-2.0.4.zip#md5=3df394d89300db95163f17c843ef49df \
-  && pip install -r /usr/src/app/requirements_server.txt \
-  && pip install --editable /usr/src/app
+  && pip install -r /home/app/hedwig/requirements_server.txt \
+  && pip install --editable /home/app/hedwig
 
-CMD ["python", "/usr/src/app/scripts/hedwigctl", "test_server"]
+COPY ./cron-task/hedwig-cron /etc/cron.d/hedwig-cron
+COPY ./app/hedwig.sh /etc/service/app/run
+
+RUN chmod 644 /etc/service/app/run && \
+chmod +x /etc/service/app/run && \
+chmod 644 /etc/cron.d/hedwig-cron && \
+touch /var/log/cron.log
+
+# Clean up APT when done.
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# CMD ["python", "/usr/src/app/scripts/hedwigctl", "test_server"]
