@@ -1,0 +1,51 @@
+# The database URL should be given in a form recognised by SQLAlchemy,
+# for example:
+#     sqlite+pysqlite:////file_path
+#     mysql+mysqlconnector://<user>:<password>@<host>[:<port>]/<dbname>
+[database]
+url=mysql+mysqlconnector://root:rjbits@db:3306/hedwig
+pool_size=14
+pool_overflow=5
+
+[application]
+name=Hedwig
+secret_key=losgatosmedanunchingodemiedo
+facilities=Generic
+log_file=
+grace_period=5
+
+# The maximum file upload sizes for proposal PDFs and figures are specified
+# here in MiB.
+[upload]
+max_pdf_size=10
+max_fig_size=1
+
+[proposal_pdf]
+renderer=ghostscript
+resolution=120
+downscale=4
+
+[proposal_fig]
+max_thumb_width=100
+max_thumb_height=100
+max_preview_width=800
+max_preview_height=800
+pdf_renderer=ghostscript
+resolution=120
+downscale=4
+
+[email]
+server=smtp.1and1.mx
+from=hello@rjbits.com
+footer_title=Observatory Proposal System
+footer_url=www.rjbits.com
+footer_email=hello@rjbits.com
+
+[utilities]
+ghostscript=/usr/bin/gs
+firefox=/usr/bin/firefox
+pdftocairo=/usr/bin/pdftocairo
+graphviz=/usr/bin/dot
+
+[ads]
+api_token=#bYyCMRSmzljdFpTPUUzP58kMjPb662qfQoE2yxZZ

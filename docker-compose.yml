@@ -1,0 +1,37 @@
+version: "2"
+services:
+  hedwig:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    depends_on:
+      - db
+    ports:
+      - "5000:5000"
+      - "5678:5678"
+    environment:
+      - PYTHONPATH=/usr/src/app/lib
+      - HEDWIG_DIR=/usr/src/app
+    volumes:
+      - .:/usr/src/app
+      - ./cron-task:/etc/cron.d
+  db:
+    image: mariadb:10.1.16
+    volumes_from:
+      - data
+    depends_on:
+      - data
+    environment:
+      - MYSQL_ROOT_PASSWORD=rjbits
+      - MYSQL_DATABASE=hedwig
+    ports:
+      - "3306:3306"
+  data:
+    image: busybox
+    volumes:
+      - data_db_hedwig:/var/lib/mysql
+  apache:
+    image: httpd:2.4.23
+volumes:
+  data_db_hedwig:
+    external: true
