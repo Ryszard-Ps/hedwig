@@ -27,8 +27,9 @@ RUN /pd_build/python.sh
 
 EXPOSE 5000
 EXPOSE 5678
-ENV PYTHONPATH=/home/app/hedwig/lib
-ENV HEDWIG_DIR=/home/app/hedwig
+ENV PYTHONPATH=/home/app/hedwig/lib \
+  HEDWIG_DIR=/home/app/hedwig \
+  TZ='Etc/UTC'
 
 RUN mkdir -p /home/app/hedwig
 WORKDIR /home/app/hedwig
@@ -51,11 +52,14 @@ RUN pip install --upgrade pip \
 
 COPY ./cron-task/hedwig-cron /etc/cron.d/hedwig-cron
 COPY ./app/hedwig.sh /etc/service/app/run
+COPY ./app/hedwig_poll.sh /etc/service/app-poll/run
 
-RUN chmod 644 /etc/service/app/run && \
-chmod +x /etc/service/app/run && \
-chmod 644 /etc/cron.d/hedwig-cron && \
-touch /var/log/cron.log
+RUN chmod 644 /etc/service/app/run \
+  && chmod +x /etc/service/app/run \
+  && chmod 644 /etc/service/app-poll/run \
+  && chmod +x /etc/service/app-poll/run \
+  && chmod 644 /etc/cron.d/hedwig-cron \
+  && touch /var/log/cron.log
 
 # Clean up APT when done.
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
