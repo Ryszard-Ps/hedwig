@@ -13,6 +13,7 @@ services:
     environment:
       - PYTHONPATH=/home/app/hedwig/lib
       - HEDWIG_DIR=/home/app/hedwig
+      - TZ=America/Mexico_City
     volumes:
       - .:/home/app/hedwig
   db:
