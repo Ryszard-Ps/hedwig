@@ -3,3 +3,5 @@
 .*.swp
 /etc/hedwig.ini
 /doc/_build
+poll.pid
+poll.log

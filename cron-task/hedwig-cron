@@ -1,2 +1,2 @@
-*/10 * * * * /usr/src/app/scripts/hedwigctl poll all --pidfile poll.pid --pause 15 --logfile poll.log
-# Don't remove the empty line at the end of this file. It is required to run the cron job
+*/10 * * * * root python /home/app/hedwig/scripts/hedwigctl poll all --pidfile /home/app/hedwig/scripts/poll.pid --pause 15 --logfile /home/app/hedwig/scripts/poll.log
+#
