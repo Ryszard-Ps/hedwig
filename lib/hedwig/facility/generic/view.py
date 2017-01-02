@@ -31,6 +31,7 @@ from .view_admin import GenericAdmin
 from .view_home import GenericHome
 from .view_proposal import GenericProposal
 from .view_review import GenericReview
+from .calculator_example import ExampleCalculator
 
 
 class Generic(GenericAdmin, GenericHome, GenericProposal, GenericReview):
@@ -92,7 +93,7 @@ class Generic(GenericAdmin, GenericHome, GenericProposal, GenericReview):
         list of calculators.
         """
 
-        return ()
+        return (ExampleCalculator,)
 
     def get_moc_order(self):
         """
