@@ -12,9 +12,11 @@ from ...view.calculator import BaseCalculator
 
 class RSRCalculator(BaseCalculator):
     EXPECTED = 1
+    TIME = 2
 
     modes = OrderedDict((
-        (EXPECTED, CalculatorMode('rms', 'RMS expected in given time')),
+        (EXPECTED, CalculatorMode('rms-exp', 'RMS expected in given time')),
+        (TIME, CalculatorMode('rms-time', 'Time required for target RMS')),
     ))
 
     version = 1
@@ -47,18 +49,33 @@ class RSRCalculator(BaseCalculator):
         if version is None:
             version = self.version
         inputs = SectionedList()
-        inputs.extend([
-            CalculatorValue(
-                'Fl', 'Frequency between: 73 & 111 GHz', None, '{}', 'GHz.'
-            ),
-            CalculatorValue(
-                't', 'Time of integration', None, '{}', 'min.'
-            ),
-        ])
+        if mode == self.EXPECTED:
+            inputs.extend([
+                CalculatorValue(
+                    'Fl', 'Frequency between: 73 & 111', None, '{}', 'GHz.'
+                ),
+                CalculatorValue(
+                    't', 'Time of integration', None, '{}', 'min.'
+                ),
+            ])
+        elif mode == self.TIME:
+            inputs.extend([
+                CalculatorValue(
+                    'Fl', 'Frequency between: 73 & 111', None, '{}', 'GHz.'
+                ),
+                CalculatorValue(
+                    's', 'Sensitivity', None, '{}', 'Temperature units'
+                )
+            ])
         return inputs
 
     def get_default_input(self, mode):
-        return {'Fl': 0.0, 't': 0.0}
+        if mode == self.EXPECTED:
+            return {'Fl': 0.0, 't': 0.0}
+        elif mode == self.TIME:
+            return {'Fl': 0.0, 's': 0.0}
+        else:
+            raise CalculatorError('Something goes wrong')
 
     def parse_input(self, mode, input_, defaults=None):
         """
@@ -94,7 +111,10 @@ class RSRCalculator(BaseCalculator):
         t_before = time.time()
 
         if mode == self.EXPECTED:
-            output = {'mK': (input_['Fl'] + input_['t'])}
+            output = {
+                'mK': (input_['Fl'] + input_['t']),
+                'mJy': 4
+            }
         else:
             raise CalculatorError('Unknown mode...')
 
@@ -111,8 +131,29 @@ class RSRCalculator(BaseCalculator):
 
         if version == 1:
             if mode == self.EXPECTED:
-                return [CalculatorValue('mK', 'Result', None, '{}', 'mK')]
+                return [
+                    CalculatorValue('mK', 'Result', None, '{}', 'mK'),
+                    CalculatorValue('mJy', 'Result', None, '{}', 'mJy')
+                ]
+            elif mode == self.TIME:
+                return []
             else:
                 raise CalculatorError('Unknown mode.')
         else:
             raise CalculatorError('Unknown version.')
+
+    def convert_input_mode(self, mode, new_mode, input_):
+        """
+        Convert the inputs for one mode to form a suitable set of inputs
+        for another mode.  Only called if the mode is changed.
+        """
+        new_input = {}
+        if mode == self.EXPECTED:
+            new_input['Fl'] = input_['Fl']
+            new_input['s'] = input_['t']
+        elif mode == self.TIME:
+            new_input['Fl'] = input_['Fl']
+            new_input['t'] = input_['s']
+        else:
+            raise CalculatorError('Unknown mode.')
+        return new_input
