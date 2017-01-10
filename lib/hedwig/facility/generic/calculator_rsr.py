@@ -144,11 +144,15 @@ class RSRCalculator(BaseCalculator):
         output = {}
 
         self._unit_selected = input_['units']
+        self._calculator.set_mode(mode)
 
         if mode == self.EXPECTED:
-            self._calculator.set_mode(mode)
             output = self._calculator.calculator(
                 input_['Fl'], input_['t'], input_['units']
+            )
+        elif mode == self.TIME:
+            output = self._calculator.calculator(
+                input_['Fl'], input_['s'], input_['units']
             )
         else:
             raise CalculatorError('Unknown mode...')
@@ -181,7 +185,20 @@ class RSRCalculator(BaseCalculator):
                         )
                     ]
             elif mode == self.TIME:
-                return []
+                if self._unit_selected == 'temperature':
+                    return [
+                        CalculatorValue('mK', 'Result', None, '{}', 'mK'),
+                        CalculatorValue(
+                            'temperature', 'Result', None, '{}', 'temperature'
+                        )
+                    ]
+                else:
+                    return [
+                        CalculatorValue('mJy', 'Result', None, '{}', 'mJy'),
+                        CalculatorValue(
+                            'flux', 'Result', None, '{}', 'flux'
+                        )
+                    ]
             else:
                 raise CalculatorError('Unknown mode.')
         else:
@@ -415,6 +432,10 @@ class RSRCalculator(BaseCalculator):
                 if proposal.id == proposal_id:
                     proposal_code = proposal.code
                     break
+
+        if 'units' not in input_values:
+            default_inputs = self.get_default_input(mode)
+            input_values['units'] = default_inputs['units']
 
         input_unit_selected = input_values['units']
         default_inputs = self.get_default_input(mode)
