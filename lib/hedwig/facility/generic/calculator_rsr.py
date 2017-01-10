@@ -57,6 +57,9 @@ class RSRCalculator(BaseCalculator):
                 CalculatorValue(
                     't', 'Time of integration', None, '{}', 'min.'
                 ),
+                CalculatorValue(
+                    'units', 'Unit of measurment', None, '{}', ''
+                )
             ])
         elif mode == self.TIME:
             inputs.extend([
@@ -65,15 +68,26 @@ class RSRCalculator(BaseCalculator):
                 ),
                 CalculatorValue(
                     's', 'Sensitivity', None, '{}', 'Temperature units'
+                ),
+                CalculatorValue(
+                    'units', 'Unit of measurment', None, '{}', ''
                 )
             ])
         return inputs
 
     def get_default_input(self, mode):
         if mode == self.EXPECTED:
-            return {'Fl': 0.0, 't': 0.0}
+            return {
+                'Fl': 0.0,
+                't': 0.0,
+                'units': ['mK', 'mJy']
+            }
         elif mode == self.TIME:
-            return {'Fl': 0.0, 's': 0.0}
+            return {
+                'Fl': 0.0,
+                's': 0.0,
+                'units': ['temperature', 'flux']
+            }
         else:
             raise CalculatorError('Something goes wrong')
 
@@ -87,12 +101,12 @@ class RSRCalculator(BaseCalculator):
         in the case of changing mode when the form has been
         filled in incompletely.
         """
-
         parsed = {}
 
         for field in self.get_inputs(mode):
             try:
-                parsed[field.code] = float(input_[field.code])
+                if field.code != 'units':
+                    parsed[field.code] = float(input_[field.code])
 
             except ValueError:
                 if (not input_[field.code]) and (defaults is not None):
@@ -100,8 +114,6 @@ class RSRCalculator(BaseCalculator):
 
                 else:
                     raise UserError('Invalid value for {}.', field.name)
-        if float(parsed['Fl']) < 73.0 or float(parsed['Fl']) > 111.0:
-            raise UserError('Invalid value for {}.', 'Frecuency')
         return parsed
 
     def __call__(self, mode, input_):
@@ -157,3 +169,13 @@ class RSRCalculator(BaseCalculator):
         else:
             raise CalculatorError('Unknown mode.')
         return new_input
+
+    def format_input(self, inputs, values):
+        """
+        Format the calculator inputs for display in the input form.
+
+        This is because the input form needs to take string inputs so that
+        we can give it back malformatted user input strings for correction.
+        """
+
+        return values
