@@ -26,7 +26,11 @@
                                     <label for="a">{{ value.name }}</label>
                                     <select name={{value.code}}>
                                       {% for arg in input_values['units'] %}
-                                        <option value="{{arg}}">
+                                        {% if input_unit_selected == arg %}
+                                          <option selected value="{{arg}}">
+                                        {% else %}
+                                          <option value="{{arg}}">
+                                        {% endif %}
                                           {{ arg }}
                                         </option>
                                       {% endfor %}
