@@ -47,7 +47,9 @@ COPY . /home/app/hedwig
 
 RUN pip install --upgrade pip \
   && pip install http://cdn.mysql.com/Downloads/Connector-Python/mysql-connector-python-2.0.4.zip#md5=3df394d89300db95163f17c843ef49df \
-  && pip install -r /home/app/hedwig/requirements_server.txt \
+  && pip install -r /home/app/hedwig/requirements.txt \
+  && pip install -r /home/app/hedwig/requirements_dev.txt \
+  && pip install -r /home/app/hedwig/requirements_calculators.txt \
   && pip install --editable /home/app/hedwig
 
 COPY ./cron-task/hedwig-cron /etc/cron.d/hedwig-cron

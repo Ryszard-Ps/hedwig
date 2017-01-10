@@ -1,0 +1,54 @@
+{% extends 'generic/calculator_base.html' %}
+{% block calculator_input %}
+    <section>
+        <h2>Input</h2>
+
+        {% if message is not none %}
+            <p class="warning">
+                {{ message }}
+            </p>
+        {% endif %}
+
+        <ol>
+            {% block calculator_input_list %}
+                {% for section in inputs.by_section() %}
+                    {% if section.name is not none %}
+                        <li class="separator">{{ section.name }}</li>
+                    {% endif %}
+                    {% for value in section.items %}
+                        {% with input = input_values[value.code] %}
+                            {% block calculator_input_item scoped %}
+                                <li>
+                                  {% if value.code != 'units' %}
+                                    <label for="a">{{ value.name }}</label>
+                                    <input type="text" name="{{ value.code }}" value="{{ input }}" />
+                                  {% else %}
+                                    <label for="a">{{ value.name }}</label>
+                                    <select name={{value.code}}>
+                                      {% for arg in input_values['units'] %}
+                                        {% if input_unit_selected == arg %}
+                                          <option selected value="{{arg}}">
+                                        {% else %}
+                                          <option value="{{arg}}">
+                                        {% endif %}
+                                          {{ arg }}
+                                        </option>
+                                      {% endfor %}
+                                    </select>
+                                  {% endif %}
+
+                                    {% if value.unit is not none %}
+                                        {{ value.unit }}
+                                    {% endif %}
+                                </li>
+                            {% endblock %}
+                        {% endwith %}
+                    {% endfor %}
+                {% endfor %}
+            {% endblock %}
+            <li>
+                <input type="submit" name="submit_calc" value="Calculate" />
+            </li>
+        </ol>
+    </section>
+{% endblock %}
