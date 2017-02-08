@@ -18,6 +18,15 @@ from ...view import auth
 
 
 class RSRCalculator(BaseCalculator):
+    """Adapter class of the RSR calculator package.
+
+    This Class use the pattern inside the documentation of Hedwig proporsal
+    system.
+
+    In order to understand completly the use of this adapter you must read the
+    article about hedwig's facilities.
+    """
+
     EXPECTED = 1
     TIME = 2
 
@@ -39,64 +48,71 @@ class RSRCalculator(BaseCalculator):
         return 'rsr'
 
     def __init__(self, facility, id_):
+        """Adapter constructor."""
         super(RSRCalculator, self).__init__(facility, id_)
         self._calculator = RSR(self.EXPECTED)
         self._unit_selected = 'mK'
 
     def get_default_facility_code(self):
         """
-        Get the code for the facility which has the template for this
+        Get the default facility's code.
+
+        Get the code for the facility which has the template for thiss
         calculator.  This method need only be overridden if the calculator
         is intended to be used by multiple facilities.
         """
         return 'rsr'
 
     def get_name(self):
+        """Get the name of the adapter."""
         return 'RSR'
 
     def get_calc_version(self):
+        """Get the current version of the RSR Calc package from its method."""
         return self._calculator.get_version()
 
     def get_inputs(self, mode, version=None):
+        """Get the configuration of the view inputs."""
         if version is None:
             version = self.version
         inputs = SectionedList()
         if mode == self.EXPECTED:
             inputs.extend([
                 CalculatorValue(
-                    'Fl', 'Frequency between: 73 & 111', None, '{}', 'GHz.'
+                    'Fl', 'Frequency', None, '{}', 'GHz. (between: 73 & 111)'
                 ),
                 CalculatorValue(
-                    't', 'Time of integration', None, '{}', 'min.'
+                    't', 'Integration time', None, '{}', 'min.'
                 ),
                 CalculatorValue(
-                    'units', 'Unit of measurment', None, '{}', ''
+                    'units', 'Measurment unit', None, '{}', ''
                 )
             ])
         elif mode == self.TIME:
             inputs.extend([
                 CalculatorValue(
-                    'Fl', 'Frequency between: 73 & 111', None, '{}', 'GHz.'
+                    'Fl', 'Frequency', None, '{}', 'GHz. (between: 73 & 111)'
                 ),
                 CalculatorValue(
-                    's', 'Sensitivity', None, '{}', 'Temperature units'
+                    's', 'Sensitivity', None, '{}', 'mK / mJy'
                 ),
                 CalculatorValue(
-                    'units', 'Unit of measurment', None, '{}', ''
+                    'units', 'Measurment unit', None, '{}', ''
                 )
             ])
         return inputs
 
     def get_default_input(self, mode):
+        """method which returns default values of the adapter."""
         if mode == self.EXPECTED:
             return {
-                'Fl': 0.0,
+                'Fl': 92.0,
                 't': 0.0,
                 'units': ['mK', 'mJy']
             }
         elif mode == self.TIME:
             return {
-                'Fl': 0.0,
+                'Fl': 92.0,
                 's': 0.0,
                 'units': ['temperature', 'flux']
             }
@@ -112,23 +128,29 @@ class RSRCalculator(BaseCalculator):
         values to avoid a UserError being raised.  This is useful
         in the case of changing mode when the form has been
         filled in incompletely.
+
+        The inputs recived from the HTML form are being validated through the
+        RSR package valdation methods.
         """
         parsed = {}
         validated = False
-
         for field in self.get_inputs(mode):
             try:
                 if field.code != 'units':
                     parsed[field.code] = float(input_[field.code])
                 else:
                     parsed[field.code] = input_[field.code]
-
+                if field.code == 't' or field.code == 's':
+                    if not self._calculator.validate_sensitivity(
+                        float(input_[field.code])
+                    ):
+                        raise UserError('Invalid value for: {}.', field.name)
             except ValueError:
                 if (not input_[field.code]) and (defaults is not None):
                     parsed[field.code] = defaults[field.code]
 
                 else:
-                    raise UserError('Invalid value for {}.', field.name)
+                    raise UserError('Invalid value for: {}.', field.name)
             validated = self._calculator.validate_frequency(parsed['Fl'])
             if validated is False:
                 raise UserError(
@@ -137,9 +159,7 @@ class RSRCalculator(BaseCalculator):
         return parsed
 
     def __call__(self, mode, input_):
-        """
-        Method in charge to perform the calculus.
-        """
+        """Method in charge to perform calculus."""
         t_before = time.time()
         output = {}
 
@@ -173,31 +193,19 @@ class RSRCalculator(BaseCalculator):
                 if self._unit_selected == 'mK':
                     return [
                         CalculatorValue('mK', 'Result', None, '{}', 'mK'),
-                        CalculatorValue(
-                            'temperature', 'Result', None, '{}', 'temperature'
-                        )
                     ]
                 else:
                     return [
                         CalculatorValue('mJy', 'Result', None, '{}', 'mJy'),
-                        CalculatorValue(
-                            'flux', 'Result', None, '{}', 'flux'
-                        )
                     ]
             elif mode == self.TIME:
                 if self._unit_selected == 'temperature':
                     return [
-                        CalculatorValue('mK', 'Result', None, '{}', 'mK'),
-                        CalculatorValue(
-                            'temperature', 'Result', None, '{}', 'temperature'
-                        )
+                        CalculatorValue('time', 'Result', None, '{}', 'min'),
                     ]
                 else:
                     return [
-                        CalculatorValue('mJy', 'Result', None, '{}', 'mJy'),
-                        CalculatorValue(
-                            'flux', 'Result', None, '{}', 'flux'
-                        )
+                        CalculatorValue('time', 'Result', None, '{}', 'min'),
                     ]
             else:
                 raise CalculatorError('Unknown mode.')
@@ -231,9 +239,7 @@ class RSRCalculator(BaseCalculator):
         return values
 
     def view(self, db, mode, args, form):
-        """
-        Web view handler for a generic calculator.
-        """
+        """Web view handler for a generic calculator."""
 
         message = None
 
