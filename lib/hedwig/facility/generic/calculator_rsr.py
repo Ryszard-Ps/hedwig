@@ -37,6 +37,16 @@ class RSRCalculator(BaseCalculator):
 
     version = 1
 
+    DEFAULT_VALUES_EXPECTED = {
+        'Fl': 92.0,
+        't': 10
+    }
+
+    DEFAULT_VALUES_TIME = {
+        'Fl': 92.0,
+        's': 10
+    }
+
     @classmethod
     def get_code(cls):
         """
@@ -85,7 +95,7 @@ class RSRCalculator(BaseCalculator):
                     't', 'Integration time', None, '{}', 'min.'
                 ),
                 CalculatorValue(
-                    'units', 'Measurment unit', None, '{}', ''
+                    'units', 'Units', None, '{}', ''
                 )
             ])
         elif mode == self.TIME:
@@ -97,7 +107,7 @@ class RSRCalculator(BaseCalculator):
                     's', 'Sensitivity', None, '{}', 'mK / mJy'
                 ),
                 CalculatorValue(
-                    'units', 'Measurment unit', None, '{}', ''
+                    'units', 'Units', None, '{}', ''
                 )
             ])
         return inputs
@@ -107,13 +117,13 @@ class RSRCalculator(BaseCalculator):
         if mode == self.EXPECTED:
             return {
                 'Fl': 92.0,
-                't': 0.0,
+                't': 10.0,
                 'units': ['mK', 'mJy']
             }
         elif mode == self.TIME:
             return {
                 'Fl': 92.0,
-                's': 0.0,
+                's': 10.0,
                 'units': ['temperature', 'flux']
             }
         else:
@@ -217,13 +227,18 @@ class RSRCalculator(BaseCalculator):
         Convert the inputs for one mode to form a suitable set of inputs
         for another mode.  Only called if the mode is changed.
         """
+
         new_input = {}
         if mode == self.EXPECTED:
-            new_input['Fl'] = input_['Fl']
-            new_input['s'] = input_['t']
+            # new_input['Fl'] = input_['Fl']
+            # new_input['s'] = input_['t']
+            new_input['Fl'] = self.DEFAULT_VALUES_EXPECTED['Fl']
+            new_input['s'] = self.DEFAULT_VALUES_EXPECTED['t']
         elif mode == self.TIME:
-            new_input['Fl'] = input_['Fl']
-            new_input['t'] = input_['s']
+            # new_input['Fl'] = input_['Fl']
+            # new_input['t'] = input_['s']
+            new_input['Fl'] = self.DEFAULT_VALUES_TIME['Fl']
+            new_input['t'] = self.DEFAULT_VALUES_TIME['s']
         else:
             raise CalculatorError('Unknown mode.')
         return new_input

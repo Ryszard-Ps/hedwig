@@ -21,15 +21,15 @@
                                 <li>
                                   {% if value.code != 'units' %}
                                     <label for="a">{{ value.name }}</label>
-                                    <input type="text" name="{{ value.code }}" value="{{ input }}" />
+                                    <input type="number" name="{{ value.code }}" value="{{ input }}" />
                                   {% else %}
                                     <label for="a">{{ value.name }}</label>
-                                    <select name={{value.code}}>
+                                    <select name={{value.code}} data-unit="select">
                                       {% for arg in input_values['units'] %}
                                         {% if input_unit_selected == arg %}
-                                          <option selected value="{{arg}}">
+                                          <option selected value="{{arg}}" data-unit-option="{{arg}}">
                                         {% else %}
-                                          <option value="{{arg}}">
+                                          <option value="{{arg}}" data-unit-option="{{arg}}">
                                         {% endif %}
                                           {{ arg }}
                                         </option>
@@ -38,7 +38,11 @@
                                   {% endif %}
 
                                     {% if value.unit is not none %}
-                                        {{ value.unit }}
+                                        {% if value.code == 's' %}
+                                          <span data-unit="units">mK</span>
+                                        {% else %}
+                                          <span>{{ value.unit }}</span>
+                                        {% endif %}
                                     {% endif %}
                                 </li>
                             {% endblock %}
@@ -51,4 +55,5 @@
             </li>
         </ol>
     </section>
+    <script src="{{url_for('static', filename='js/edit_calc_rsr.js')}}"></script>
 {% endblock %}
