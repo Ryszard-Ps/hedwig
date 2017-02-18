@@ -21,7 +21,7 @@
                                 <li>
                                   {% if value.code != 'units' %}
                                     <label for="a">{{ value.name }}</label>
-                                    <input type="number" name="{{ value.code }}" value="{{ input }}" />
+                                    <input type="number" step="0.01" name="{{ value.code }}" value="{{ input }}" />
                                   {% else %}
                                     <label for="a">{{ value.name }}</label>
                                     <select name={{value.code}} data-unit="select">
