@@ -15,23 +15,23 @@
 # this program; if not, write to the Free Software Foundation, Inc.,51 Franklin
 # Street, Fifth Floor, Boston, MA  02110-1301, USA
 
-from __future__ import absolute_import, division, print_function, \
-    unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
-from collections import defaultdict, OrderedDict
+from collections import OrderedDict, defaultdict
 
 from ...error import NoSuchRecord, NoSuchValue
-from ...type.enum import AffiliationType, \
-    BaseCallType, BaseReviewerRole, BaseTextRole, \
-    FormatType
+from ...type.enum import (AffiliationType, BaseCallType, BaseReviewerRole,
+                          BaseTextRole, FormatType)
 from ...type.simple import Call
 from ...type.util import null_tuple
+from .calculator_aztec import AZTECCalculator
+from .calculator_rsr import RSRCalculator
 from .tool_clash import ClashTool
 from .view_admin import GenericAdmin
 from .view_home import GenericHome
 from .view_proposal import GenericProposal
 from .view_review import GenericReview
-from .calculator_rsr import RSRCalculator
 
 
 class Generic(GenericAdmin, GenericHome, GenericProposal, GenericReview):
@@ -93,7 +93,7 @@ class Generic(GenericAdmin, GenericHome, GenericProposal, GenericReview):
         list of calculators.
         """
 
-        return (RSRCalculator,)
+        return (RSRCalculator, AZTECCalculator,)
 
     def get_moc_order(self):
         """
