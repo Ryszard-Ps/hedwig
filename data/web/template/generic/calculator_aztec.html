@@ -20,7 +20,7 @@
                         {% with input = input_values[value.code] %}
                             {% block calculator_input_item scoped %}
                                 <li>
-                                    {% if value.code == 'Dd' %}
+                                    {% if value.code == 'dd' %}
                                     <label for="a">{{ value.name }}</label>
                                     <input type="text" name="{{ value.code }}" value="{{ input }}" />
                                     <div class="formtip">
@@ -28,8 +28,8 @@
                                           <p>
                                             <b>Ayuda</b>
                                             <br/>
-                                            <i>:D</i>
-                                            <p>Esto es un msj de ayuda!</p>
+                                            <i>Descripción</i>
+                                            <p>Aquí va mi mensaje de ayuda!</p>
                                           </p>
                                       </div>
                                       </div>
@@ -45,6 +45,25 @@
             {% endblock %}
             <li>
                 <input type="submit" name="submit_calc" value="Calculate" />
+            </li>
+        </ol>
+    </section>
+{% endblock %}
+{% block calculator_modes %}
+    <section>
+        <h2>Calculator Mode</h2>
+
+        <ol>
+            <li>
+                <label for="mode">Observing Map Mode:</label>
+                <select name="mode">
+                    {% for (mode_id, mode) in modes.items() %}
+                      <option value="{{ mode_id }}" {{ 'selected="selected"' | safe if mode_id == current_mode }}>{{mode.name}}</option>
+                    {% endfor %}
+                </select>
+            </li>
+            <li>
+                <input type="submit" name="submit_mode" value="Change mode" />
             </li>
         </ol>
     </section>

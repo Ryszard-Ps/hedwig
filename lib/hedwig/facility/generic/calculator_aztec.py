@@ -1,8 +1,9 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-# import time
 from collections import OrderedDict
+
+from aztec_calculator import Aztec
 
 from ...error import CalculatorError, UserError
 from ...type.misc import SectionedList
@@ -16,27 +17,25 @@ class AZTECCalculator(BaseCalculator):
     PHOTHOMETRY = 3
 
     modes = OrderedDict((
-        (LARGE, CalculatorMode('large', 'Large Observing Map Mode')),
-        (SMALL, CalculatorMode('small', 'Small Observing Map Mode')),
-        (PHOTHOMETRY, CalculatorMode('phothometry', 'Photometry\
-         Observing Map Mode')),
+        (LARGE, CalculatorMode('large', 'Large')),
+        (SMALL, CalculatorMode('small', 'Small')),
+        (PHOTHOMETRY, CalculatorMode('phothometry', 'Photometry')),
     ))
 
     version = 1
 
     DEFAULT_VALUES_LARGE = {
-        'Dd': 0.0,
-        'Ma': 0.0
+        'dd': 0,
+        'ma': 0
     }
     DEFAULT_VALUES_SMALL = {
-        'Dd': 0.0,
-        'NEFD': 0.0
+        'dd': 0,
+        'nefd': 0
     }
     DEFAULT_VALUES_PHOTHOMETRY = {
-        'NEFD': 0.0,
-        'S': 0.0,
-        'SNR': 0.0,
-        'FWHM': 0.0
+        'nefd': 0,
+        's': 0,
+        'snr': 0
     }
 
     @classmethod
@@ -46,15 +45,16 @@ class AZTECCalculator(BaseCalculator):
     def __init__(self, facility, id_):
         # Add instance of Calculator AzTEC
         super(AZTECCalculator, self).__init__(facility, id_)
+        self._calculator = Aztec(self.LARGE)
 
     def get_default_facility_code(self):
         return 'aztec'
 
     def get_name(self):
-        return 'AzTEC'
+        return 'AzTEC, Observing Map Mode:'
 
     def get_calc_version(self):
-        return '0.0.0'
+        return self._calculator.get_calc_version()
 
     def get_inputs(self, mode, version=None):
         if version is None:
@@ -66,23 +66,22 @@ class AZTECCalculator(BaseCalculator):
             if mode == self.LARGE:
                 inputs.extend([
                     CalculatorValue(
-                        'Ma', 'Map area', None, '{}', 'arcmin\u00B2'
+                        'ma', 'Map area', None, '{}', 'arcmin\u00B2'
                     ),
-                    CalculatorValue('Dd', 'Desired depth', None, '{}', 'mJy')
+                    CalculatorValue('dd', 'Desired depth', None, '{}', 'mJy')
                 ])
             elif mode == self.SMALL:
                 inputs.extend([
-                    CalculatorValue('NEFD', 'NEFD', None, '{}', ''),
-                    CalculatorValue('Dd', 'Desired depth', None, '{}', 'mJy')
+                    CalculatorValue('nefd', 'NEFD', None, '{}', ''),
+                    CalculatorValue('dd', 'Desired depth', None, '{}', 'mJy')
                 ])
             elif mode == self.PHOTHOMETRY:
                 inputs.extend([
-                    CalculatorValue('NEFD', 'NEFD', None, '{}', ''),
+                    CalculatorValue('nefd', 'NEFD', None, '{}', ''),
                     CalculatorValue(
-                        'S', 'S\u2081.\u2081\u2098\u2098', None, '{}', ''
+                        's', 'S\u2081.\u2081\u2098\u2098', None, '{}', ''
                     ),
-                    CalculatorValue('SNR', 'SNR', None, '{}', ''),
-                    CalculatorValue('FWHM', 'FWHM', None, '{}', '')
+                    CalculatorValue('snr', 'SNR', None, '{}', '')
                 ])
             else:
                 raise CalculatorError('Unknown mode.')
@@ -92,11 +91,11 @@ class AZTECCalculator(BaseCalculator):
 
     def get_default_input(self, mode):
         if mode == self.LARGE:
-            return {'Ma': 0.0, 'Dd': 0.0}
+            return {'ma': 0, 'dd': 0}
         elif mode == self.SMALL:
-            return {'NEFD': 0.0, 'Dd': 0.0}
+            return {'nefd': 0, 'dd': 0}
         elif mode == self.PHOTHOMETRY:
-            return {'NEFD': 0.0, 'S': 0.0, 'SNR': 0.0, 'FWHM': 0.0}
+            return {'nefd': 0, 's': 0, 'snr': 0}
         else:
             raise CalculatorError('Unknown mode.')
 
@@ -115,14 +114,32 @@ class AZTECCalculator(BaseCalculator):
     def __call__(self, mode, input_):
         # t_before = time.time()
         extra = {}
+        self._calculator.set_calculator_mode(mode)
         if mode == self.LARGE:
             # Add class calculator
             # output = self._calculator.calculator(input_['Ma'], input_['Dd'])
-            output = {'Hr': 113.6400}
+            output = self._calculator.calculate(
+                map_area=input_['ma'],
+                dd=input_['dd']
+            )
+            # {'Hr': 113.6400}
         elif mode == self.SMALL:
-            output = {'Hr': 9.0200}
+            print(self._calculator.calculate(
+                nefd=input_['nefd'],
+                dd=input_['dd']
+            ))
+            output = self._calculator.calculate(
+                nefd=input_['nefd'],
+                dd=input_['dd']
+            )
+            # {'Hr': 9.0200}
         elif mode == self.PHOTHOMETRY:
-            output = {'sec': 1318.5100, 'arcsec': 0.0600}
+            output = self._calculator.calculate(
+                nefd=input_['nefd'],
+                s=input_['s'],
+                snr=input_['snr']
+            )
+            # {'Sec': 1318.5100, 'arcsec': 0.0600}
         else:
             raise CalculatorError('Unknown mode.')
         return CalculatorResult(output, extra)
@@ -146,7 +163,7 @@ class AZTECCalculator(BaseCalculator):
             elif mode == self.PHOTHOMETRY:
                 return [
                     CalculatorValue(
-                        'sec', 'Requided Time', None, '{:.2f}', 'sec'
+                        'Sec', 'Requided Time', None, '{:.2f}', 'Sec'
                     ),
                     CalculatorValue(
                         'arcsec', 'Positional Uncertainty',
@@ -162,16 +179,15 @@ class AZTECCalculator(BaseCalculator):
         new_input = input_.copy()
         # result = self(mode, input_)
         if new_mode == self.LARGE:
-            new_input['Ma'] = self.DEFAULT_VALUES_LARGE['Ma']
-            new_input['Dd'] = self.DEFAULT_VALUES_LARGE['Dd']
+            new_input['ma'] = self.DEFAULT_VALUES_LARGE['ma']
+            new_input['dd'] = self.DEFAULT_VALUES_LARGE['dd']
         elif new_mode == self.SMALL:
-            new_input['NEFD'] = self.DEFAULT_VALUES_SMALL['NEFD']
-            new_input['Dd'] = self.DEFAULT_VALUES_SMALL['Dd']
+            new_input['nefd'] = self.DEFAULT_VALUES_SMALL['nefd']
+            new_input['dd'] = self.DEFAULT_VALUES_SMALL['dd']
         elif new_mode == self.PHOTHOMETRY:
-            new_input['NEFD'] = self.DEFAULT_VALUES_PHOTHOMETRY['NEFD']
-            new_input['S'] = self.DEFAULT_VALUES_PHOTHOMETRY['S']
-            new_input['SNR'] = self.DEFAULT_VALUES_PHOTHOMETRY['SNR']
-            new_input['FWHM'] = self.DEFAULT_VALUES_PHOTHOMETRY['FWHM']
+            new_input['nefd'] = self.DEFAULT_VALUES_PHOTHOMETRY['nefd']
+            new_input['s'] = self.DEFAULT_VALUES_PHOTHOMETRY['s']
+            new_input['snr'] = self.DEFAULT_VALUES_PHOTHOMETRY['snr']
         else:
             raise CalculatorError('Unknown mode.')
         return new_input
