@@ -1,3 +1,20 @@
+"""## Modulo del Adapter para la calculadora RSR.
+
+Este modulo contienen la funcionalidad que enlaza la calculadora RSR con el
+sistema Hedwig.
+
+El código fuente aparece de lado derecho de esta documentación.
+
+también puede ser encontrado en el siguiente enlace:
+
+[Repositorio de esta versión de hedwig](https://github.com/sezzh/hedwig)
+
+Ruta del archivo:
+
+```
+lib/hedwig/facility/generic/calculator_rsr.py
+```
+"""
 from __future__ import absolute_import, division, print_function, \
     unicode_literals
 
@@ -16,15 +33,28 @@ from ...type.simple import CalculatorMode, CalculatorResult, CalculatorValue, \
 from ...view.calculator import BaseCalculator
 from ...view import auth
 
-
+# ## RSRCalculator
 class RSRCalculator(BaseCalculator):
-    """Adapter class of the RSR calculator package.
+    """Clase del Adapter para la calculadora RSR.
 
-    This Class use the pattern inside the documentation of Hedwig proporsal
-    system.
+    Esta Clase sigue el patrón de diseño propuesto por la documentacion de
+    Hedwig Proposal System.
 
-    In order to understand completly the use of this adapter you must read the
-    article about hedwig's facilities.
+    En orden para entender complemtamente el uso de este adaptador, se debe
+    leer el articulo sobre:
+
+    > Hedwig's facilities.
+
+    ### Atributos de la clase:
+
+    * EXPECTED => Refiere al primer modo de la calculadora.
+    * TIME => Refiere al segundo modo de la calculadora.
+    * modes => Refiere a los nombres designados para cada modo y
+    la url a utilizarse.
+    * DEFAULT_VALUES_EXPECTED => Valores por defecto de entrada.
+    * DEFAULT_VALUES_TIME => Valores por defecto de entrada.
+    * version => Atributo usado para almacenar la versión actual que se usa
+    de la calculadora dentro de la tabla calculation.
     """
 
     EXPECTED = 1
@@ -49,40 +79,76 @@ class RSRCalculator(BaseCalculator):
 
     @classmethod
     def get_code(cls):
-        """
-        Get the calculator "code".
+        """Regresa el código de la calculadora.
 
-        This is a short string used to uniquely identify the calculator
-        within the facility which uses it.
+        @classmethod
+
+        Params:
+
+        * cls => instancia de la clase.
+
+        Este es un String que se utiliza para identificar inequivocamente
+        a la calculadora con el facility que lo implementa.
+
+        Returns:
+
+        * String.
+
         """
         return 'rsr'
 
     def __init__(self, facility, id_):
-        """Adapter constructor."""
+        """Adapter's Constructor.
+
+        Constructor de la Clase Adapter.
+
+        Params:
+
+        * facility => Instancia del facility.
+        * id_ => id.
+        """
         super(RSRCalculator, self).__init__(facility, id_)
         self._calculator = RSR(self.EXPECTED)
         self._unit_selected = 'mK'
 
     def get_default_facility_code(self):
-        """
-        Get the default facility's code.
+        """Obtener el facility_code.
 
-        Get the code for the facility which has the template for thiss
-        calculator.  This method need only be overridden if the calculator
-        is intended to be used by multiple facilities.
+        Se obtiene el facility_code para el facility y así poder recuperar los
+        los templates para esta calculadora.
         """
         return 'rsr'
 
     def get_name(self):
-        """Get the name of the adapter."""
+        """Obtener el nombre del Adapter.
+
+        Returns:
+
+        * String
+        """
         return 'RSR'
 
     def get_calc_version(self):
-        """Get the current version of the RSR Calc package from its method."""
+        """Obtener la versión del package de la calculadora RSR.
+
+        Returns:
+
+        * String
+        """
         return self._calculator.get_version()
 
     def get_inputs(self, mode, version=None):
-        """Get the configuration of the view inputs."""
+        """Obtener los inputs para la vista.
+
+        Params:
+
+        * mode => modo actual de la calculadora.
+        * version => (default = None) versión de la calculadora.
+
+        Returns:
+
+        * SectionedList
+        """
         if version is None:
             version = self.version
         inputs = SectionedList()
@@ -113,7 +179,12 @@ class RSRCalculator(BaseCalculator):
         return inputs
 
     def get_default_input(self, mode):
-        """method which returns default values of the adapter."""
+        """Obtener valores por defecto para las vistas.
+
+        Params:
+
+        * mode => modo actual de la calculadora.
+        """
         if mode == self.EXPECTED:
             return {
                 'Fl': 92.0,
@@ -130,17 +201,20 @@ class RSRCalculator(BaseCalculator):
             raise CalculatorError('Something goes wrong')
 
     def parse_input(self, mode, input_, defaults=None):
-        """
-        Parse inputs as obtained from the HTML form (typically unicode)
-        and return values suitable for calculation (perhaps float).
+        """Convierte los inputs obtenidos del HTML.
 
-        If defaults are specified, these are used in place of missing
-        values to avoid a UserError being raised.  This is useful
-        in the case of changing mode when the form has been
-        filled in incompletely.
+        Adicionalmente los convierte a tipos situables para realizar los
+        calculos correspondientes.
 
-        The inputs recived from the HTML form are being validated through the
-        RSR package valdation methods.
+        Params:
+
+        * mode => modo actual de la calculadora.
+        * input_ => los inputs recibidos de las vistas HTML.
+        * defaults => (default = None) valores por defecto de las calculadoras.
+
+        Returns:
+
+        * Dict
         """
         parsed = {}
         validated = False
@@ -169,7 +243,17 @@ class RSRCalculator(BaseCalculator):
         return parsed
 
     def __call__(self, mode, input_):
-        """Method in charge to perform calculus."""
+        """Ejecuta el calculo.
+
+        Params:
+
+        * mode => modo actual de la calculadora.
+        * input_ => valores recibidos para realizar el calculo.
+
+        Returns:
+
+        * CalculatorResult
+        """
         t_before = time.time()
         output = {}
 
@@ -190,9 +274,16 @@ class RSRCalculator(BaseCalculator):
         return CalculatorResult(output, {})
 
     def get_outputs(self, mode, version=None):
-        """
-        Get the list of calculator outputs for a given version of the
-        calculator.
+        """Obtener las salidas de las calculos.
+
+        Params:
+
+        * mode => modo actual de la calculadora.
+        * version => (default = None) versión actual de la calculadora.
+
+        Returns:
+
+        * list [CalculatorValue,]
         """
 
         if version is None:
@@ -223,20 +314,26 @@ class RSRCalculator(BaseCalculator):
             raise CalculatorError('Unknown version.')
 
     def convert_input_mode(self, mode, new_mode, input_):
-        """
-        Convert the inputs for one mode to form a suitable set of inputs
-        for another mode.  Only called if the mode is changed.
+        """Convierte la entrada de un modo en la entrada del otro.
+
+        Params:
+
+        * mode => modo actual de la calculadora.
+        * new_mode => modo a cambiar de la calculadora.
+        * input_ valores ingresados del HTML.
+
+        Returns:
+
+        * Dict
         """
 
         new_input = {}
         if mode == self.EXPECTED:
-            # new_input['Fl'] = input_['Fl']
-            # new_input['s'] = input_['t']
+
             new_input['Fl'] = self.DEFAULT_VALUES_EXPECTED['Fl']
             new_input['s'] = self.DEFAULT_VALUES_EXPECTED['t']
         elif mode == self.TIME:
-            # new_input['Fl'] = input_['Fl']
-            # new_input['t'] = input_['s']
+
             new_input['Fl'] = self.DEFAULT_VALUES_TIME['Fl']
             new_input['t'] = self.DEFAULT_VALUES_TIME['s']
         else:
@@ -244,17 +341,33 @@ class RSRCalculator(BaseCalculator):
         return new_input
 
     def format_input(self, inputs, values):
-        """
-        Format the calculator inputs for display in the input form.
+        """Formatea los inputs para ser visibles en el formulario HTML.
+        Params:
 
-        This is because the input form needs to take string inputs so that
-        we can give it back malformatted user input strings for correction.
+        * inputs => inputs que serán mostrados en el HTML.
+        * values => valores de los inputs.
+
+        Returns:
+
+        * Dict
         """
 
         return values
 
     def view(self, db, mode, args, form):
-        """Web view handler for a generic calculator."""
+        """Método encargado de cargar el HTML.
+
+        Params:
+
+        db => instancia de la DB.
+        mode => modo actual de la calculadora.
+        args => argumentos.
+        form => forumario HTML.
+
+        Returns:
+
+        * Dict
+        """
 
         message = None
 
@@ -267,8 +380,6 @@ class RSRCalculator(BaseCalculator):
         calculation_title = ''
         overwrite = False
 
-        # If the user is logged in, determine whether there are any proposals
-        # to which they can add calculator results.
         proposals = None
         if 'user_id' in session and 'person' in session:
             proposals = [
@@ -299,9 +410,6 @@ class RSRCalculator(BaseCalculator):
                 if 'overwrite' in form:
                     overwrite = True
 
-                # Work primarily with the un-parsed "input_values" so that,
-                # in the event of a parsing error, we can still put the user
-                # data back in the form for correction.
                 input_values = self.get_form_input(inputs, form)
 
                 if 'submit_mode' in form:
@@ -315,8 +423,6 @@ class RSRCalculator(BaseCalculator):
                         raise HTTPError('Invalid mode.')
 
                     if new_mode != mode:
-                        # If the mode actually changed, convert the input
-                        # and then create new formatted input values.
                         new_input = self.convert_input_mode(mode, new_mode,
                                                             parsed_input)
 
@@ -335,7 +441,6 @@ class RSRCalculator(BaseCalculator):
 
                     proposal_id = int(form['proposal_id'])
 
-                    # Check access via the normal auth module.
                     proposal = db.get_proposal(self.facility.id_, proposal_id,
                                                with_members=True)
 
@@ -348,8 +453,6 @@ class RSRCalculator(BaseCalculator):
                     output = self(mode, parsed_input)
 
                     if overwrite:
-                        # Check that the calculation is really for the right
-                        # proposal.
                         try:
                             calculation = db.get_calculation(calculation_id)
                         except NoSuchRecord:
@@ -410,7 +513,6 @@ class RSRCalculator(BaseCalculator):
                 except NoSuchRecord:
                     raise HTTPNotFound('Calculation not found.')
 
-                # Check authorization to see this calculation.
                 proposal = db.get_proposal(
                     self.facility.id_, calculation.proposal_id,
                     with_members=True, with_reviewers=True)
@@ -439,14 +541,10 @@ class RSRCalculator(BaseCalculator):
                     message = e.message
 
             else:
-                # When we didn't receive a form submission, get the default
-                # values -- need to convert these to strings to match the
-                # form input strings as explained above.
                 default_input = self.get_default_input(mode)
 
             input_values = self.format_input(inputs, default_input)
 
-        # If we have a specific proposal ID, see if we know its code.
         proposal_code = None
         if (proposal_id is not None) and (proposals is not None):
             for proposal in proposals:
