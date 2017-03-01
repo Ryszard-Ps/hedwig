@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """## Modulo del Adapter para la calculadora RSR.
 
 Este modulo contienen la funcionalidad que enlaza la calculadora RSR con el
