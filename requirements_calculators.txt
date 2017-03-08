@@ -1,2 +1,2 @@
 git+https://github.com/Ryszard-Ps/rsr-calculator.git
-git+https://github.com/sezzh/aztec-calculator.git@develop
+git+https://github.com/sezzh/aztec-calculator.git
