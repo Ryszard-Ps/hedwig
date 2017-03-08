@@ -17,9 +17,10 @@ class AZTECCalculator(BaseCalculator):
     PHOTHOMETRY = 3
 
     modes = OrderedDict((
-        (LARGE, CalculatorMode('large', 'Large')),
-        (SMALL, CalculatorMode('small', 'Small')),
-        (PHOTHOMETRY, CalculatorMode('phothometry', 'Photometry')),
+        (LARGE, CalculatorMode('large', 'Large Observing Map Mode')),
+        (SMALL, CalculatorMode('small', 'Small Observing Map Mode')),
+        (PHOTHOMETRY, CalculatorMode('phothometry', 'Photometry Observing\
+            Map Mode')),
     ))
 
     version = 1
@@ -30,10 +31,8 @@ class AZTECCalculator(BaseCalculator):
     }
     DEFAULT_VALUES_SMALL = {
         'dd': 0,
-        'nefd': 0
     }
     DEFAULT_VALUES_PHOTHOMETRY = {
-        'nefd': 0,
         's': 0,
         'snr': 0
     }
@@ -51,7 +50,7 @@ class AZTECCalculator(BaseCalculator):
         return 'aztec'
 
     def get_name(self):
-        return 'AzTEC, Observing Map Mode:'
+        return 'AzTEC'
 
     def get_calc_version(self):
         return self._calculator.get_calc_version()
@@ -72,14 +71,12 @@ class AZTECCalculator(BaseCalculator):
                 ])
             elif mode == self.SMALL:
                 inputs.extend([
-                    CalculatorValue('nefd', 'NEFD', None, '{}', ''),
                     CalculatorValue('dd', 'Desired depth', None, '{}', 'mJy')
                 ])
             elif mode == self.PHOTHOMETRY:
                 inputs.extend([
-                    CalculatorValue('nefd', 'NEFD', None, '{}', ''),
                     CalculatorValue(
-                        's', 'S\u2081.\u2081\u2098\u2098', None, '{}', ''
+                        's', 'S\u2081.\u2081\u2098\u2098', None, '{}', 'mJy'
                     ),
                     CalculatorValue('snr', 'SNR', None, '{}', '')
                 ])
@@ -93,9 +90,9 @@ class AZTECCalculator(BaseCalculator):
         if mode == self.LARGE:
             return {'ma': 0, 'dd': 0}
         elif mode == self.SMALL:
-            return {'nefd': 0, 'dd': 0}
+            return {'dd': 0}
         elif mode == self.PHOTHOMETRY:
-            return {'nefd': 0, 's': 0, 'snr': 0}
+            return {'s': 0, 'snr': 0}
         else:
             raise CalculatorError('Unknown mode.')
 
@@ -104,6 +101,8 @@ class AZTECCalculator(BaseCalculator):
         for field in self.get_inputs(mode):
             try:
                 parsed[field.code] = float(input_[field.code])
+                if parsed[field.code] <= 0.0:
+                    raise UserError('Invalid value for {}.', field.name)
             except ValueError:
                 if (not input_[field.code]) and (defaults is not None):
                     parsed[field.code] = defaults[field.code]
@@ -125,17 +124,14 @@ class AZTECCalculator(BaseCalculator):
             # {'Hr': 113.6400}
         elif mode == self.SMALL:
             print(self._calculator.calculate(
-                nefd=input_['nefd'],
                 dd=input_['dd']
             ))
             output = self._calculator.calculate(
-                nefd=input_['nefd'],
                 dd=input_['dd']
             )
             # {'Hr': 9.0200}
         elif mode == self.PHOTHOMETRY:
             output = self._calculator.calculate(
-                nefd=input_['nefd'],
                 s=input_['s'],
                 snr=input_['snr']
             )
@@ -176,16 +172,15 @@ class AZTECCalculator(BaseCalculator):
             raise CalculatorError('Unknown version.')
 
     def convert_input_mode(self, mode, new_mode, input_):
-        new_input = input_.copy()
+        # new_input = input_.copy()
         # result = self(mode, input_)
+        new_input = {}
         if new_mode == self.LARGE:
             new_input['ma'] = self.DEFAULT_VALUES_LARGE['ma']
             new_input['dd'] = self.DEFAULT_VALUES_LARGE['dd']
         elif new_mode == self.SMALL:
-            new_input['nefd'] = self.DEFAULT_VALUES_SMALL['nefd']
             new_input['dd'] = self.DEFAULT_VALUES_SMALL['dd']
         elif new_mode == self.PHOTHOMETRY:
-            new_input['nefd'] = self.DEFAULT_VALUES_PHOTHOMETRY['nefd']
             new_input['s'] = self.DEFAULT_VALUES_PHOTHOMETRY['s']
             new_input['snr'] = self.DEFAULT_VALUES_PHOTHOMETRY['snr']
         else:
