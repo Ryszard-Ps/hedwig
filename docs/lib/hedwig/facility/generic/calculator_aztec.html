@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>calculator_aztec.py</title>
+  <link rel="stylesheet" href="../../../../pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div class='section'>
+    <div class='docs'><h1>calculator_aztec.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      <h2>Modulo adaptador de la calculadora AzTEC.</h2>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="p">(</span><span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span>
+                        <span class="n">unicode_literals</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+
+<span class="kn">from</span> <span class="nn">aztec_calculator</span> <span class="kn">import</span> <span class="n">Aztec</span>
+
+<span class="kn">from</span> <span class="nn">...error</span> <span class="kn">import</span> <span class="n">CalculatorError</span><span class="p">,</span> <span class="n">UserError</span>
+<span class="kn">from</span> <span class="nn">...type.misc</span> <span class="kn">import</span> <span class="n">SectionedList</span>
+<span class="kn">from</span> <span class="nn">...type.simple</span> <span class="kn">import</span> <span class="n">CalculatorMode</span><span class="p">,</span> <span class="n">CalculatorResult</span><span class="p">,</span> <span class="n">CalculatorValue</span>
+<span class="kn">from</span> <span class="nn">...view.calculator</span> <span class="kn">import</span> <span class="n">BaseCalculator</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      <h3>Clase adapter para AzTEC.</h3>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">class</span> <span class="nc">AZTECCalculator</span><span class="p">(</span><span class="n">BaseCalculator</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      <p>Atributos de la clase:</p>
+<ul>
+<li><code>LARGE</code> - (int) - Modo Large Observing Map Mode.</li>
+<li><code>SMALL</code> - (int) - Modo Small Observing Map Mode.</li>
+<li><code>PHOTHOMETRY</code> - (int) - Mode Photometry Observing Map Mode.</li>
+<li><code>version</code> - (int) - Versión del adaptador.</li>
+<li><code>DEFAULT_VALUES_LARGE</code> - (dict) - Valores por defecto para el modo LARGE</li>
+<li><code>DEFAULT_VALUES_SMALL</code> - (dict) - Valores por defecto para el modo SMALL</li>
+<li><code>DEFAULT_VALUES_PHOTHOMETRY</code> - (dict) - Valores por defecto para el modo PHOTHOMETRY</li>
+</ul>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">LARGE</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">SMALL</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">PHOTHOMETRY</span> <span class="o">=</span> <span class="mi">3</span>
+
+    <span class="n">modes</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">((</span>
+        <span class="p">(</span><span class="n">LARGE</span><span class="p">,</span> <span class="n">CalculatorMode</span><span class="p">(</span><span class="s1">&#39;large&#39;</span><span class="p">,</span> <span class="s1">&#39;Large Observing Map Mode&#39;</span><span class="p">)),</span>
+        <span class="p">(</span><span class="n">SMALL</span><span class="p">,</span> <span class="n">CalculatorMode</span><span class="p">(</span><span class="s1">&#39;small&#39;</span><span class="p">,</span> <span class="s1">&#39;Small Observing Map Mode&#39;</span><span class="p">)),</span>
+        <span class="p">(</span><span class="n">PHOTHOMETRY</span><span class="p">,</span> <span class="n">CalculatorMode</span><span class="p">(</span><span class="s1">&#39;phothometry&#39;</span><span class="p">,</span> <span class="s1">&#39;Photometry Observing</span><span class="se">\</span>
+<span class="s1">            Map Mode&#39;</span><span class="p">)),</span>
+    <span class="p">))</span>
+
+    <span class="n">version</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="n">DEFAULT_VALUES_LARGE</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;dd&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s1">&#39;ma&#39;</span><span class="p">:</span> <span class="mi">0</span>
+    <span class="p">}</span>
+    <span class="n">DEFAULT_VALUES_SMALL</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;dd&#39;</span><span class="p">:</span> <span class="mi">0</span>
+    <span class="p">}</span>
+    <span class="n">DEFAULT_VALUES_PHOTHOMETRY</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;s&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s1">&#39;snr&#39;</span><span class="p">:</span> <span class="mi">0</span>
+    <span class="p">}</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
+      </div>
+      <h3>Retorna el codigo de la calculadora.</h3>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">get_code</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-4'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-4'>#</a>
+      </div>
+      <p><strong> :Parameters: </strong></p>
+<ul>
+<li><code>cls</code> - Instancia de la clase.</li>
+</ul>
+<p><strong> :rtype: </strong> str</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">return</span> <span class="s1">&#39;aztec&#39;</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-5'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-5'>#</a>
+      </div>
+      <h3>Constructor AZTECCalculator.</h3>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">facility</span><span class="p">,</span> <span class="n">id_</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-6'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-6'>#</a>
+      </div>
+      <p><strong> :Parameters: </strong></p>
+<ul>
+<li><code>facility</code> - Instancia del facility.</li>
+<li><code>id_</code> - id de la Instancia.</li>
+</ul>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="nb">super</span><span class="p">(</span><span class="n">AZTECCalculator</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">facility</span><span class="p">,</span> <span class="n">id_</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_calculator</span> <span class="o">=</span> <span class="n">Aztec</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">LARGE</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-7'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-7'>#</a>
+      </div>
+      <h3>Obtiene el codigo del facility.</h3>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">get_default_facility_code</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-8'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-8'>#</a>
+      </div>
+      <p>Se obtiene el codigo del facility para el facility.</p>
+<p><strong> :rtype: </strong> str</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">return</span> <span class="s1">&#39;aztec&#39;</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-9'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-9'>#</a>
+      </div>
+      <p>Obtener el nombre del Adaptador.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">get_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-10'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-10'>#</a>
+      </div>
+      <p><strong> :rtype: </strong> str</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">return</span> <span class="s1">&#39;AzTEC&#39;</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-11'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-11'>#</a>
+      </div>
+      <h3>Obtiene la versión de la calculadora.</h3>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">get_calc_version</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-12'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-12'>#</a>
+      </div>
+      <p><strong> :rtype: </strong> str</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculator</span><span class="o">.</span><span class="n">get_calc_version</span><span class="p">()</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-13'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-13'>#</a>
+      </div>
+      <h3>Obtiene los valores.</h3>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">get_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-14'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-14'>#</a>
+      </div>
+      <p><strong> :Parameters: </strong></p>
+<ul>
+<li><code>mode</code> - (int) - Modo actual de la calculadora.</li>
+<li><code>version</code> - (int) - Versión de la calculadora.</li>
+</ul>
+<p><strong> :rtype: </strong> SectionedList</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">if</span> <span class="n">version</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">version</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span>
+
+        <span class="n">inputs</span> <span class="o">=</span> <span class="n">SectionedList</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">LARGE</span><span class="p">:</span>
+                <span class="n">inputs</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span>
+                    <span class="n">CalculatorValue</span><span class="p">(</span>
+                        <span class="s1">&#39;ma&#39;</span><span class="p">,</span> <span class="s1">&#39;Map area&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s1">&#39;{}&#39;</span><span class="p">,</span> <span class="s1">&#39;arcmin</span><span class="se">\u00B2</span><span class="s1">&#39;</span>
+                    <span class="p">),</span>
+                    <span class="n">CalculatorValue</span><span class="p">(</span><span class="s1">&#39;dd&#39;</span><span class="p">,</span> <span class="s1">&#39;Desired depth&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s1">&#39;{}&#39;</span><span class="p">,</span> <span class="s1">&#39;mJy&#39;</span><span class="p">)</span>
+                <span class="p">])</span>
+            <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">SMALL</span><span class="p">:</span>
+                <span class="n">inputs</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span>
+                    <span class="n">CalculatorValue</span><span class="p">(</span><span class="s1">&#39;dd&#39;</span><span class="p">,</span> <span class="s1">&#39;Desired depth&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s1">&#39;{}&#39;</span><span class="p">,</span> <span class="s1">&#39;mJy&#39;</span><span class="p">)</span>
+                <span class="p">])</span>
+            <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">PHOTHOMETRY</span><span class="p">:</span>
+                <span class="n">inputs</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span>
+                    <span class="n">CalculatorValue</span><span class="p">(</span>
+                        <span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="s1">&#39;S</span><span class="se">\u2081</span><span class="s1">.</span><span class="se">\u2081\u2098\u2098</span><span class="s1">&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s1">&#39;{}&#39;</span><span class="p">,</span> <span class="s1">&#39;mJy&#39;</span>
+                    <span class="p">),</span>
+                    <span class="n">CalculatorValue</span><span class="p">(</span><span class="s1">&#39;snr&#39;</span><span class="p">,</span> <span class="s1">&#39;SNR&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s1">&#39;{}&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">CalculatorError</span><span class="p">(</span><span class="s1">&#39;Unknown mode.&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">CalculatorError</span><span class="p">(</span><span class="s1">&#39;Unknown version.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">inputs</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-15'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-15'>#</a>
+      </div>
+      <h3>Obtiene los valores de la vista.</h3>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">get_default_input</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-16'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-16'>#</a>
+      </div>
+      <p><strong> :Parameters: </strong></p>
+<ul>
+<li><code>mode</code> - (int) - Modo actual de la calculadora.</li>
+</ul>
+<p><strong> :rtype: </strong> dict</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">LARGE</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;ma&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;dd&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">SMALL</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;dd&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">PHOTHOMETRY</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;s&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;snr&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">CalculatorError</span><span class="p">(</span><span class="s1">&#39;Unknown mode.&#39;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-17'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-17'>#</a>
+      </div>
+      <p>Convierte las entradas de la vista.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">parse_input</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">input_</span><span class="p">,</span> <span class="n">defaults</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-18'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-18'>#</a>
+      </div>
+      <p><strong> :Parameters: </strong></p>
+<ul>
+<li><code>mode</code> - (int) - Modo actual de la calculadora.</li>
+<li><code>input_</code> - (dict) - Entradas de los formularios.</li>
+<li><code>defaults</code> - Valores por defecto de la calculadora.</li>
+</ul>
+<p><strong> :rtype: </strong> dict</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">parsed</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_inputs</span><span class="p">(</span><span class="n">mode</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">parsed</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">input_</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">code</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">parsed</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">code</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s1">&#39;Invalid value for {}.&#39;</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">input_</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">code</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="n">defaults</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+                    <span class="n">parsed</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">defaults</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">code</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">UserError</span><span class="p">(</span><span class="s1">&#39;Invalid value for {}.&#39;</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">parsed</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-19'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-19'>#</a>
+      </div>
+      <h3>Realiza las operaciones.</h3>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">input_</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-20'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-20'>#</a>
+      </div>
+      <p><strong> :Parameters: </strong></p>
+<ul>
+<li><code>mode</code> - (int) - Modo actual de la calculadora.</li>
+<li><code>input_</code> - (dict) - Valores de la operación.</li>
+</ul>
+<p><strong> :rtype: </strong> CalculatorResult</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">extra</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_calculator</span><span class="o">.</span><span class="n">set_calculator_mode</span><span class="p">(</span><span class="n">mode</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">LARGE</span><span class="p">:</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculator</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span>
+                <span class="n">map_area</span><span class="o">=</span><span class="n">input_</span><span class="p">[</span><span class="s1">&#39;ma&#39;</span><span class="p">],</span>
+                <span class="n">dd</span><span class="o">=</span><span class="n">input_</span><span class="p">[</span><span class="s1">&#39;dd&#39;</span><span class="p">]</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">SMALL</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_calculator</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span>
+                <span class="n">dd</span><span class="o">=</span><span class="n">input_</span><span class="p">[</span><span class="s1">&#39;dd&#39;</span><span class="p">]</span>
+            <span class="p">))</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculator</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span>
+                <span class="n">dd</span><span class="o">=</span><span class="n">input_</span><span class="p">[</span><span class="s1">&#39;dd&#39;</span><span class="p">]</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">PHOTHOMETRY</span><span class="p">:</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculator</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span>
+                <span class="n">s</span><span class="o">=</span><span class="n">input_</span><span class="p">[</span><span class="s1">&#39;s&#39;</span><span class="p">],</span>
+                <span class="n">snr</span><span class="o">=</span><span class="n">input_</span><span class="p">[</span><span class="s1">&#39;snr&#39;</span><span class="p">]</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">CalculatorError</span><span class="p">(</span><span class="s1">&#39;Unknown mode.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">CalculatorResult</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">extra</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-21'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-21'>#</a>
+      </div>
+      <p>Obtener las salidas de las operaciones.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">get_outputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-22'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-22'>#</a>
+      </div>
+      <p><strong> :Parameters: </strong></p>
+<ul>
+<li><code>mode</code> - (int) - Modo actual de la calculadora.</li>
+<li><code>version</code> - (int) - Versión actual de la calculadora.</li>
+</ul>
+<p><strong> :rtype: </strong> [CalculatorValue,]</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">if</span> <span class="n">version</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">version</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span>
+        <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">LARGE</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">[</span>
+                    <span class="n">CalculatorValue</span><span class="p">(</span>
+                        <span class="s1">&#39;Hr&#39;</span><span class="p">,</span> <span class="s1">&#39;Requided Time&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s1">&#39;{:.2f}&#39;</span><span class="p">,</span> <span class="s1">&#39;Hr&#39;</span>
+                    <span class="p">),</span>
+                <span class="p">]</span>
+            <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">SMALL</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">[</span>
+                    <span class="n">CalculatorValue</span><span class="p">(</span>
+                        <span class="s1">&#39;Hr&#39;</span><span class="p">,</span> <span class="s1">&#39;Requided Time&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s1">&#39;{:.2f}&#39;</span><span class="p">,</span> <span class="s1">&#39;Hr&#39;</span>
+                    <span class="p">),</span>
+                <span class="p">]</span>
+            <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">PHOTHOMETRY</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">[</span>
+                    <span class="n">CalculatorValue</span><span class="p">(</span>
+                        <span class="s1">&#39;Sec&#39;</span><span class="p">,</span> <span class="s1">&#39;Requided Time&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s1">&#39;{:.2f}&#39;</span><span class="p">,</span> <span class="s1">&#39;Sec&#39;</span>
+                    <span class="p">),</span>
+                    <span class="n">CalculatorValue</span><span class="p">(</span>
+                        <span class="s1">&#39;arcsec&#39;</span><span class="p">,</span> <span class="s1">&#39;Positional Uncertainty&#39;</span><span class="p">,</span>
+                        <span class="bp">None</span><span class="p">,</span> <span class="s1">&#39;{:.2f}&#39;</span><span class="p">,</span> <span class="s1">&#39;arcsec&#39;</span>
+                    <span class="p">),</span>
+                <span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">CalculatorError</span><span class="p">(</span><span class="s1">&#39;Unknown mode.&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">CalculatorError</span><span class="p">(</span><span class="s1">&#39;Unknown version.&#39;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-23'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-23'>#</a>
+      </div>
+      <p>Asigna los valores de un modo a otro.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">convert_input_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">new_mode</span><span class="p">,</span> <span class="n">input_</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-24'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-24'>#</a>
+      </div>
+      <p><strong> :Parameters: </strong></p>
+<ul>
+<li><code>mode</code> - (int) - Modo actual de la calculadora.</li>
+<li><code>new_mode</code> - (int) - Modo a cambiar de la calculadora.</li>
+<li><code>input_</code> - (dict) - Valores de entrada en los formularios.</li>
+</ul>
+<p><strong> :rtype: </strong> dict</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">new_input</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">new_mode</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">LARGE</span><span class="p">:</span>
+            <span class="n">new_input</span><span class="p">[</span><span class="s1">&#39;ma&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_VALUES_LARGE</span><span class="p">[</span><span class="s1">&#39;ma&#39;</span><span class="p">]</span>
+            <span class="n">new_input</span><span class="p">[</span><span class="s1">&#39;dd&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_VALUES_LARGE</span><span class="p">[</span><span class="s1">&#39;dd&#39;</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">new_mode</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">SMALL</span><span class="p">:</span>
+            <span class="n">new_input</span><span class="p">[</span><span class="s1">&#39;dd&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_VALUES_SMALL</span><span class="p">[</span><span class="s1">&#39;dd&#39;</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">new_mode</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">PHOTHOMETRY</span><span class="p">:</span>
+            <span class="n">new_input</span><span class="p">[</span><span class="s1">&#39;s&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_VALUES_PHOTHOMETRY</span><span class="p">[</span><span class="s1">&#39;s&#39;</span><span class="p">]</span>
+            <span class="n">new_input</span><span class="p">[</span><span class="s1">&#39;snr&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_VALUES_PHOTHOMETRY</span><span class="p">[</span><span class="s1">&#39;snr&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">CalculatorError</span><span class="p">(</span><span class="s1">&#39;Unknown mode.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_input</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-25'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-25'>#</a>
+      </div>
+      <p>Asigna formato a las entradas del formulario.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">format_input</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-26'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-26'>#</a>
+      </div>
+      <p><strong> :Parameters: </strong></p>
+<ul>
+<li><code>inputs</code> - (dict) - Entradas con que se mostraran en la vista.</li>
+<li><code>values</code> - (dict) - Valores de las entradas.</li>
+</ul>
+<p><strong> :rtype: </strong> dict</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">return</span> <span class="n">values</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>
