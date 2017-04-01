@@ -116,14 +116,14 @@ class RSRCalculator(BaseCalculator):
         """method which returns default values of the adapter."""
         if mode == self.EXPECTED:
             return {
-                'Fl': 92.0,
-                't': 10.0,
+                'Fl': self.DEFAULT_VALUES_EXPECTED['Fl'],
+                't': self.DEFAULT_VALUES_EXPECTED['t'],
                 'units': ['mK', 'mJy']
             }
         elif mode == self.TIME:
             return {
-                'Fl': 92.0,
-                's': 10.0,
+                'Fl': self.DEFAULT_VALUES_TIME['Fl'],
+                's': self.DEFAULT_VALUES_TIME['s'],
                 'units': ['temperature', 'flux']
             }
         else:
